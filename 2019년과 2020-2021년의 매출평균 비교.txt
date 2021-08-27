@@ -1,0 +1,41 @@
+#KB국민은행 데이터 불러오기
+data <- read.csv("KB국민카드_금융빅데이터경진대회_데이터_raw2.csv")
+data
+
+#2019년 마케팅업종 
+d19 <- data %>% filter(기준년도 == "2019") %>% select(마케팅업종세분류명,기준년도,성별구분,매출건수)
+d201 <- data %>% filter(기준년도 == "2020" | 기준년도 == "2021") %>% select(마케팅업종세분류명,기준년도,성별구분,매출건수)
+
+#2019년 마케팅업종 매출평균
+df <- d19 %>% 
+  group_by(마케팅업종세분류명) %>% 
+  summarise(mean = mean(매출건수))
+
+df_1 <- data.frame(
+  year = c("2019","2019","2019","2019","2019","2019","2019","2019","2019")
+) 
+df1 <- cbind(df_1,df)
+
+#2020년과 2021년 마케팅업종 매출평균
+df.2 <- d201 %>% 
+  group_by(마케팅업종세분류명) %>% 
+  summarise(mean = mean(매출건수))
+
+df_2 <- data.frame(
+  year = c("2020-2021","2020-2021","2020-2021","2020-2021","2020-2021","2020-2021","2020-2021","2020-2021","2020-2021")
+  )
+df2 <- cbind(df_2,df.2)
+
+#2019년과 2020-2021년의 데이터프레임 병합
+df_12 <- bind_rows(df1,df2)
+
+#2019년과 2020-2021년의 10-30대의 마케팅업종별 매출평균
+g <- ggplot(df_12, aes(x = 마케팅업종세분류명, y = mean, fill = year)) +
+  geom_bar(stat = "identity", position = "dodge")+
+  labs(title = "2019년과 2020-2021년의 10-30대 마케팅업종 세분류명 매출평균 비교", x = "업종명", y = "매출건수 평균", fill = 
+         "년도")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  scale_fill_brewer(palette="Pastel1")+
+  coord_flip()+
+  geom_text(aes(label=round(mean, digits = 1)), position=position_dodge(width=1))
+plot(g)
