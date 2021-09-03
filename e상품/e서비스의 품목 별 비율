@@ -1,0 +1,23 @@
+#금융보안원 데이터 불러오기
+dat <- read.csv("금융보안원_경진대회_데이터(최종제출).csv")
+dat
+
+aa <- dat %>% select(기준년월,품목대분류명,품목중분류명,연령,매출건수)%>%
+  filter(품목대분류명 == "e상품/서비스")
+aa <-  aa %>% filter(연령 == "20대" | 연령 == "30대" | 연령 == "20세 미만")
+
+#e상품/서비스의 품목별 비율
+aa %>%
+  ggplot(aes("", fill=품목중분류명)) + 
+  geom_bar(position = "fill")+
+  coord_polar(theta = "y") +
+  geom_text(data = . %>% 
+              group_by(품목중분류명) %>%
+              tally() %>%
+              mutate(p = n / sum(n)) %>%
+              ungroup(),
+            aes(y = p, label = scales::percent(p)),
+            position = position_stack(vjust = 0.5),
+            show.legend = FALSE)+
+  labs(title = "E상품/서비스의 품목 별 비율",x ="",y ="")+
+  theme(plot.title = element_text(hjust = 0.5))
